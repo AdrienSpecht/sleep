@@ -1,0 +1,29 @@
+key,asleep,awake
+Sleep Deprivation: 64h → Recovery: 16h / 8h,,0.0
+Sleep Deprivation: 64h → Recovery: 16h / 8h,64.0,72.0
+Sleep Deprivation: 64h → Recovery: 16h / 8h,88.0,96.0
+Sleep Deprivation: 64h → Recovery: 16h / 8h,112.0,120.0
+Sleep Deprivation: 64h → Recovery: 16h / 8h,136.0,144.0
+Sleep Deprivation: 64h → Recovery: 16h / 8h,160.0,168.0
+Sleep Deprivation: 64h → Recovery: 16h / 8h,184.0,192.0
+Sleep Deprivation: 64h → Recovery: 16h / 8h,208.0,216.0
+Sleep Deprivation: 64h → Recovery: 16h / 8h,232.0,240.0
+Chronic Sleep Restriction: 21h / 3h → Recovery: 16h / 8h,,0.0
+Chronic Sleep Restriction: 21h / 3h → Recovery: 16h / 8h,21.0,24.0
+Chronic Sleep Restriction: 21h / 3h → Recovery: 16h / 8h,45.0,48.0
+Chronic Sleep Restriction: 21h / 3h → Recovery: 16h / 8h,69.0,72.0
+Chronic Sleep Restriction: 21h / 3h → Recovery: 16h / 8h,93.0,96.0
+Chronic Sleep Restriction: 21h / 3h → Recovery: 16h / 8h,117.0,120.0
+Chronic Sleep Restriction: 21h / 3h → Recovery: 16h / 8h,141.0,144.0
+Chronic Sleep Restriction: 21h / 3h → Recovery: 16h / 8h,165.0,168.0
+Chronic Sleep Restriction: 21h / 3h → Recovery: 16h / 8h,184.0,192.0
+Chronic Sleep Restriction: 21h / 3h → Recovery: 16h / 8h,208.0,216.0
+Chronic Sleep Restriction: 21h / 3h → Recovery: 16h / 8h,232.0,240.0
+Chronic Sleep Restriction: 21h / 3h → Recovery: 16h / 8h,256.0,264.0
+Chronic Sleep Restriction: 21h / 3h → Recovery: 16h / 8h,280.0,288.0
+Chronic Sleep Restriction: 21h / 3h → Recovery: 16h / 8h,304.0,312.0
+Chronic Sleep Restriction: 21h / 3h → Recovery: 16h / 8h,328.0,336.0
+Control: 16h / 8h,,0.0
+Control: 16h / 8h,16.0,24.0
+Control: 16h / 8h,40.0,48.0
+Control: 16h / 8h,64.0,72.0
