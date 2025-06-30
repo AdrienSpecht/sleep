@@ -7,7 +7,7 @@ from sleep import Model
 
 @pytest.fixture(name="diary")
 def fixture_diary():
-    return pd.read_csv("tutorial/diary.csv")
+    return pd.read_csv("data/diary.csv")
 
 
 def test_unfied(diary):
@@ -57,19 +57,21 @@ def test_unfied(diary):
     # Compute ds/dt and d(d)/dt
     ds_dt = np.diff(s) / np.diff(time)
     dd_dt = np.diff(d) / np.diff(time)
+    s_mid = (s[1:] + s[:-1]) / 2
+    d_mid = (d[1:] + d[:-1]) / 2
 
     # During wake: ds/dt = (1-s)/t_w
-    expected_ds_dt = (1 - s[wake_mask]) / t_w
+    expected_ds_dt = (1 - s_mid[wake_mask[:-1]]) / t_w
     np.testing.assert_allclose(ds_dt[wake_mask[:-1]], expected_ds_dt, rtol=rtol)
 
     # During wake: d(d)/dt = (-d + 1) / t_la
-    expected_dd_dt = (-d[wake_mask] + 1) / t_la
+    expected_dd_dt = (-d_mid[wake_mask[:-1]] + 1) / t_la
     np.testing.assert_allclose(dd_dt[wake_mask[:-1]], expected_dd_dt, rtol=rtol)
 
     # During sleep: ds/dt = -(s-d)/t_s
-    expected_ds_dt = -(s[sleep_mask] - d[sleep_mask]) / t_s
-    np.testing.assert_allclose(ds_dt[sleep_mask[:-1]], expected_ds_dt[:-1], rtol=rtol)
+    expected_ds_dt = -(s_mid[sleep_mask[:-1]] - d_mid[sleep_mask[:-1]]) / t_s
+    np.testing.assert_allclose(ds_dt[sleep_mask[:-1]], expected_ds_dt, rtol=rtol)
 
     # During sleep: d(d)/dt = (-d - wsr) / t_la
-    expected_dd_dt = (-d[sleep_mask] - wsr) / t_la
-    np.testing.assert_allclose(dd_dt[sleep_mask[:-1]], expected_dd_dt[:-1], rtol=rtol)
+    expected_dd_dt = (-d_mid[sleep_mask[:-1]] - wsr) / t_la
+    np.testing.assert_allclose(dd_dt[sleep_mask[:-1]], expected_dd_dt, rtol=rtol)

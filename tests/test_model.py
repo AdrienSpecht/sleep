@@ -8,7 +8,7 @@ from sleep import Model
 
 @pytest.fixture(name="diary")
 def fixture_diary():
-    return pd.read_csv("tutorial/diary.csv")
+    return pd.read_csv("data/diary.csv")
 
 
 def test_model_init(diary):
