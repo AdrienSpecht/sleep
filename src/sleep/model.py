@@ -82,7 +82,13 @@ class Model:
         for k, g in df.groupby("key"):
             sc = pd.concat([g.awake, g.asleep]).dropna().to_numpy()
             sc.sort()
-            id_sc[self.key_id[k]] = torch.as_tensor(sc, device=self.device, dtype=torch.float32)
+            if g.rested.sum() != 1:
+                raise ValueError(f"Diary {k} must have exactly one fully rested point.")
+            rested = np.argwhere(sc == g.loc[g.rested, "awake"].item()).flatten()[0]
+            id_sc[self.key_id[k]] = (
+                torch.as_tensor(sc, device=self.device, dtype=torch.float32),
+                torch.as_tensor(rested, device=self.device, dtype=torch.int64),
+            )
         return id_sc
 
     def __str__(self) -> str:
@@ -132,12 +138,12 @@ class Model:
 
         # Compute once per unique diary
         for idx_uid, idx_rows in idx_uid_rows.items():
-            sc = self.id_sc[uniq_ids[idx_uid].item()]
+            sc, rested = self.id_sc[uniq_ids[idx_uid].item()]
 
             # stack parameters of the same diary → (1,pi)
             params_uid = {k: v[idx_rows].reshape(1, -1) for k, v in params.items()}
             time_uid = time[idx_rows].flatten()
-            out_blk = self.backend.compute(sc, time_uid, **params_uid)
+            out_blk = self.backend.compute(sc, rested, time_uid, **params_uid)
 
             # slice back - views preserve autograd
             for j, i in enumerate(idx_rows):

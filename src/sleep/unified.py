@@ -55,9 +55,32 @@ class Unified:
             "  dd/dt = (-d - wsr) / t_la"
         )
 
+    def infer_initial_state(self, sc, rested, t_s, t_w, t_la, need, T):
+        """
+        Walk *backwards* through the diary until the very first timestamp,
+        starting from the fully-rested (s_w, d_w) at wake - sc[rested].
+        """
+        wsr = (T - need) / need
+        s1, d1, _, _ = self._periodic_values(t_s, t_w, t_la, wsr, T)
+        gap = s1 - d1  # use the gap to find s0
+
+        wake = False  # the first backstep segment is always sleep
+        if rested > 0:
+            for t0, t1 in zip(sc[:rested].flip(0), sc[1 : rested + 1].flip(0)):  # reverse iterate
+                dt = (t1 - t0).reshape(1, 1)  # keep tensor shape
+                if wake:
+                    d1 = self._wake_backstep(d1, dt, t_la)
+                else:
+                    d1 = self._sleep_backstep(d1, dt, t_la, wsr)
+                wake = not wake
+        s1 = d1.clone() + gap
+
+        return s1, d1  # these are s0, d0 at the very first diary row
+
     def compute(
         self,
         sc: torch.Tensor,
+        rested: torch.Tensor,
         time: torch.Tensor,
         t_s: torch.Tensor,
         t_w: torch.Tensor,
@@ -69,24 +92,23 @@ class Unified:
         wsr = (T - need) / need
         pi, mi = wsr.numel(), time.numel()
 
-        # ----- initial conditions -----
+        # ----- initialisations -----
         wake = True
-        s0, d0, _, _ = self._periodic_values(t_s, t_w, t_la, wsr, T)
-        prev = sc[0]
+        s0, d0 = self.infer_initial_state(sc, rested, t_s, t_w, t_la, need, T)
 
-        s = torch.full((mi, pi), fill_value=torch.nan, device=time.device, dtype=time.dtype)
-        d = torch.full_like(s, fill_value=torch.nan)
+        s = torch.full((mi, pi), torch.nan, device=time.device, dtype=time.dtype)
+        d = torch.full_like(s, torch.nan)
 
         # ----- propagate over sleep/wake segments -----
         done = 0
         total = torch.sum(~torch.isnan(time)).item()
-        for nxt in sc[1:]:
+        for t0, t1 in zip(sc[:-1], sc[1:]):
             if done == total:
                 break  # early exit if all time points computed
 
-            in_seg = (prev <= time) & (time < nxt)
-            t = torch.cat([time[in_seg], nxt.unsqueeze(0)])
-            dt = (t - prev).reshape(-1, 1)  # (mseg, 1)
+            in_seg = (t0 <= time) & (time < t1)
+            t = torch.cat([time[in_seg], t1.unsqueeze(0)])
+            dt = (t - t0).reshape(-1, 1)  # (mseg, 1)
 
             if wake:
                 s_seg = 1.0 - (1.0 - s0) * torch.exp(-dt / t_w)  #  (mseg, pi)
@@ -97,11 +119,10 @@ class Unified:
             if dt.numel() > 1:
                 s[in_seg] = s_seg[:-1]
                 d[in_seg] = d_seg[:-1]
-                done += in_seg.sum()
+            done += in_seg.sum()
 
             s0, d0 = s_seg[-1:], d_seg[-1:]  # (1, pi)
             wake = not wake
-            prev = nxt
 
         return {"homeostasis": s.T, "debt": d.T}  # (m, pi)
 
@@ -136,15 +157,6 @@ class Unified:
     #  Core maths - all torch, differentiable
     # ──────────────────────────────────────────────────────────────
     @staticmethod
-    def _sleep_step(s0, d0, dt, t_s, t_la, wsr):
-        d = -wsr + (d0 + wsr) * torch.exp(-dt / t_la)
-        e_s = torch.exp(-dt / t_s)
-        e_la = torch.exp(-dt / t_la)
-        B = t_la / (t_la - t_s)
-        s = -wsr + (s0 + wsr) * e_s + B * (d0 + wsr) * (e_la - e_s)
-        return s, d
-
-    @staticmethod
     def _periodic_values(t_s, t_w, t_la, wsr, T):
         tot_w = T * wsr / (wsr + 1.0)
         tot_s = T - tot_w
@@ -160,6 +172,36 @@ class Unified:
         s_w = (wsr * (d - 1) + d * (1 - c) + e * (b - d) * (1 - a + a * d_w + wsr)) / (1 - d * c)
         s_s = 1 - c + c * s_w
         return s_w, d_w, s_s, d_s
+
+    @staticmethod
+    def _wake_step(s0, d0, dt, t_w, t_la):
+        """Compute the wake time point from start condition."""
+        s = 1.0 - (1.0 - s0) * torch.exp(-dt / t_w)  #  (mseg, pi)
+        d = 1.0 - (1.0 - d0) * torch.exp(-dt / t_la)
+        return s, d
+
+    @staticmethod
+    def _sleep_step(s0, d0, dt, t_s, t_la, wsr):
+        """Compute the sleep time point from start condition."""
+        e_s = torch.exp(-dt / t_s)
+        e_la = torch.exp(-dt / t_la)
+        B = t_la / (t_la - t_s)
+        d = -wsr + (d0 + wsr) * e_la
+        s = -wsr + (s0 + wsr) * e_s + B * (d0 + wsr) * (e_la - e_s)
+        return s, d
+
+    @staticmethod
+    def _wake_backstep(d1, dt, t_la):
+        """Compute the wake time point from end condition."""
+        d0 = 1.0 - (1.0 - d1) * torch.exp(+dt / t_la)
+        return d0
+
+    @staticmethod
+    def _sleep_backstep(d1, dt, t_la, wsr):
+        """Inverse of the sleep time point from end condition."""
+        e_la = torch.exp(-dt / t_la)
+        d0 = -wsr + (d1 + wsr) / e_la
+        return d0
 
     def plot(
         self, ax, diary: pd.DataFrame, time: np.ndarray, homeostasis: np.ndarray, debt: np.ndarray

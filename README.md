@@ -8,11 +8,14 @@ This package provides tools for analyzing and simulating sleep pressure dynamics
 
 ## Table of Contents
 
-1. [Installation](#installation)
-2. [Getting started](#getting-started)
-3. [Sleep diary](#sleep-diary-format)
-4. [Contributions](#contributions)
-5. [References](#references)
+- [Sleep](#sleep)
+  - [Table of Contents](#table-of-contents)
+  - [Installation](#installation)
+  - [Getting started](#getting-started)
+    - [Sleep diary format](#sleep-diary-format)
+    - [Example](#example)
+  - [Contributions](#contributions)
+  - [References](#references)
 
 ---
 
@@ -42,15 +45,15 @@ Sleep diaries should be provided with the following columns:
 
 Example:
 
-| key               | asleep | awake |
-| ----------------- | ------ | ----- |
-| Control: 16h / 8h |        | 0.0   |
-| Control: 16h / 8h | 16.0   | 24.0  |
-| Control: 16h / 8h | 40.0   | 48.0  |
+| key               | asleep | awake | rested |
+| ----------------- | ------ | ----- | ------ |
+| Control: 16h / 8h |        | 0.0   | True   |
+| Control: 16h / 8h | 16.0   | 24.0  |        |
+| Control: 16h / 8h | 40.0   | 48.0  |        |
 
 Each row represents a sleep-wake cycle, where:
 
-- The first row typically starts with an empty `asleep` value and `awake=0.0` to indicate the initial wake state. We assume a rested state at the beginning.
+- The first row typically starts with an empty `asleep` value and `awake=0.0` to indicate the initial wake state. Here, we assume a rested state at the beginning.
 - Subsequent rows contain the sleep onset (`asleep`) and wake time (`awake`) in hours
 - Multiple sleep schedules can be included, distinguished by their `key` values
 
