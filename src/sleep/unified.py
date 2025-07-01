@@ -209,6 +209,7 @@ class Unified:
         """Plot homeostasis, debt, and sleep periods for a given key."""
         # Plot homeostasis and debt
         time = time / 24
+        time -= time[0]  # offset to start at 0
         ax.plot(time, homeostasis, "orange", linestyle="dotted", label="Homeostasis")
         ax.plot(time, debt, "green", label="Debt")
         ax.set_xlim(time[0], time[-1])

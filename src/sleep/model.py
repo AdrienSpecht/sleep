@@ -169,14 +169,15 @@ class Model:
         n, m = len(key), 0
         grouped = self.diary.set_index("key").loc[key].groupby("key", sort=False)
         for k, g in grouped:
-            m = max(m, 1 + int(g["awake"].max() * 60) // step)  # number of points in the diary
+            length_hours = g["awake"].max() - g["awake"].min()
+            m = max(m, int(length_hours) * 60 // step)  # number of points in the diary
 
         # Create time array
         time = np.full((n, m), np.nan)
         mi = []  # number of points in the diary
         for i, k in enumerate(key):
             g = grouped.get_group(k)
-            ti = np.arange(0, g["awake"].max() * 60, step)
+            ti = np.arange(g["awake"].min() * 60, g["awake"].max() * 60, step)
             time[i, : len(ti)] = ti / 60  # in hours
             mi.append(len(ti))
 
