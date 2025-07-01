@@ -169,7 +169,7 @@ class Model:
         n, m = len(key), 0
         grouped = self.diary.set_index("key").loc[key].groupby("key", sort=False)
         for k, g in grouped:
-            m = max(m, int(g["awake"].max() * 60) // step)  # number of points in the diary
+            m = max(m, 1 + int(g["awake"].max() * 60) // step)  # number of points in the diary
 
         # Create time array
         time = np.full((n, m), np.nan)

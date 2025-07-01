@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "sleep"
-version = "0.0.1"
+version = "0.0.2"
 description = "Sleep Pressure Modeling"
 readme = "README.md"
 license = "MIT"
