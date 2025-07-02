@@ -80,7 +80,7 @@ class Model:
         """Map IDs to state changes."""
         id_sc = {}
         for k, g in df.groupby("key"):
-            sc = pd.concat([g.awake, g.asleep]).dropna().to_numpy()
+            sc = pd.concat([g.awake, g.asleep, pd.Series([np.inf])]).dropna().to_numpy()
             sc.sort()
             if g.rested.sum() != 1:
                 raise ValueError(f"Diary {k} must have exactly one fully rested point.")
