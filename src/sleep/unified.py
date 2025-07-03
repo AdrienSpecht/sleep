@@ -107,18 +107,21 @@ class Unified:
                 break  # early exit if all time points computed
 
             in_seg = (t0 <= time) & (time < t1)
-            t = torch.cat([time[in_seg], t1.unsqueeze(0)])
+            last_seg = torch.isinf(t1)
+            if not last_seg:  # need t1 for the next segment
+                t = torch.cat([time[in_seg], t1.unsqueeze(0)])
+            else:
+                t = time[in_seg]
             dt = (t - t0).reshape(-1, 1)  # (mseg, 1)
 
             if wake:
-                s_seg = 1.0 - (1.0 - s0) * torch.exp(-dt / t_w)  #  (mseg, pi)
-                d_seg = 1.0 - (1.0 - d0) * torch.exp(-dt / t_la)
+                s_seg, d_seg = self._wake_step(s0, d0, dt, t_w, t_la)
             else:  # sleep
                 s_seg, d_seg = self._sleep_step(s0, d0, dt, t_s, t_la, wsr)
 
-            if dt.numel() > 1:
-                s[in_seg] = s_seg[:-1]
-                d[in_seg] = d_seg[:-1]
+            if dt.numel() > 1 or last_seg:
+                s[in_seg] = s_seg[:-1] if not last_seg else s_seg
+                d[in_seg] = d_seg[:-1] if not last_seg else d_seg
             done += in_seg.sum()
 
             s0, d0 = s_seg[-1:], d_seg[-1:]  # (1, pi)
