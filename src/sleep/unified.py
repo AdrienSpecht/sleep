@@ -212,17 +212,14 @@ class Unified:
         """Plot homeostasis, debt, and sleep periods for a given key."""
         # Plot homeostasis and debt
         time = time / 24
-        time -= time[0]  # offset to start at 0
+        offset = time[0]  # offset to start at 0
+        time -= offset
         ax.plot(time, homeostasis, "orange", linestyle="dotted", label="Homeostasis")
         ax.plot(time, debt, "green", label="Debt")
         ax.set_xlim(time[0], time[-1])
         ax.grid(True, alpha=0.3)
 
         for i, (asleep, awake) in enumerate(zip(diary["asleep"], diary["awake"])):
-            ax.axvspan(
-                asleep / 24,
-                awake / 24,
-                color="gray",
-                alpha=0.3,
-                label="Sleep" if i == 0 else "",
-            )
+            t0 = asleep / 24 - offset
+            t1 = awake / 24 - offset
+            ax.axvspan(t0, t1, color="gray", alpha=0.3, label="Sleep" if i == 0 else "")
