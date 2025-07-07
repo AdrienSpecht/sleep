@@ -5,3 +5,9 @@ unified:
     t_w: 40.0
     t_s: 1.0
     t_la: 97.4
+
+two_process:
+  default:
+    t_w: 36.75
+    t_s: 4.51
+    
