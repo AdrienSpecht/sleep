@@ -9,6 +9,7 @@ __pycache__/
 
 # Jupyter Notebook
 .ipynb_checkpoints
+Sandbox test sleep_main.ipynb
 
 # Distribution / packaging
 .Python
