@@ -10,4 +10,6 @@ two_process:
   default:
     t_w: 36.75
     t_s: 4.51
+    T: 24.0
+    need: 8.0
     

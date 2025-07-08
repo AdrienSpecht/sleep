@@ -7,7 +7,8 @@ import pandas as pd
 import torch
 import yaml
 
-from sleep.unified import Unified, Two_process
+from sleep.unified import Unified
+from sleep.two_process import TwoProcess
 from sleep.utils.io import normalise_inputs, to_flat_cpu_array
 
 with importlib.resources.files("sleep").joinpath("params.yaml").open("r") as f:
@@ -16,7 +17,7 @@ import matplotlib.pyplot as plt
 
 METHODS = {
     "unified": Unified,
-    "two_process": Two_process,
+    "two_process": TwoProcess,
 }
 SUPPORTED = list(METHODS.keys())
 
