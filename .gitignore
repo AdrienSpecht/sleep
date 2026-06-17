@@ -9,6 +9,7 @@ __pycache__/
 
 # Jupyter Notebook
 .ipynb_checkpoints
+Sandbox test sleep_main.ipynb
 
 # Distribution / packaging
 .Python
@@ -22,3 +23,7 @@ sdist/
 
 # vscode
 .vscode/
+
+#REm_propensity
+figures/REM_propensity_explorations/
+old_REM_propensity/

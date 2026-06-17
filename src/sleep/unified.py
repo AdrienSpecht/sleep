@@ -91,34 +91,33 @@ class Unified:
         """Compute homeostasis and debt."""
         wsr = (T - need) / need
         pi, mi = wsr.numel(), time.numel()
-
         # ----- initialisations -----
         wake = True
         s0, d0 = self.infer_initial_state(sc, rested, t_s, t_w, t_la, need, T)
-
         s = torch.full((mi, pi), torch.nan, device=time.device, dtype=time.dtype)
         d = torch.full_like(s, torch.nan)
 
         # ----- propagate over sleep/wake segments -----
         done = 0
         total = torch.sum(~torch.isnan(time)).item()
+        
         for t0, t1 in zip(sc[:-1], sc[1:]):
             if done == total:
                 break  # early exit if all time points computed
 
             in_seg = (t0 <= time) & (time < t1)
+            
             last_seg = torch.isinf(t1)
             if not last_seg:  # need t1 for the next segment
                 t = torch.cat([time[in_seg], t1.unsqueeze(0)])
             else:
                 t = time[in_seg]
+            
             dt = (t - t0).reshape(-1, 1)  # (mseg, 1)
-
             if wake:
                 s_seg, d_seg = self._wake_step(s0, d0, dt, t_w, t_la)
             else:  # sleep
                 s_seg, d_seg = self._sleep_step(s0, d0, dt, t_s, t_la, wsr)
-
             if dt.numel() > 1 or last_seg:
                 s[in_seg] = s_seg[:-1] if not last_seg else s_seg
                 d[in_seg] = d_seg[:-1] if not last_seg else d_seg
@@ -223,3 +222,5 @@ class Unified:
             t0 = asleep / 24 - offset
             t1 = awake / 24 - offset
             ax.axvspan(t0, t1, color="gray", alpha=0.3, label="Sleep" if i == 0 else "")
+
+

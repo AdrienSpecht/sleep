@@ -10,7 +10,7 @@ def fixture_diary():
     return pd.read_csv("data/diary.csv")
 
 
-def test_unfied(diary):
+def test_unified(diary):
     """
     Test the Model.compute method by verifying that the numerical solution matches the expected
     differential equations for homeostasis and debt:
